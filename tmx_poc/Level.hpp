@@ -4,10 +4,10 @@
 #include "TileSet.hpp"
 #include <vector>
 
-typedef std::vector<std::vector<Tile*>> tilemap;
+typedef std::vector<std::vector<Tile*>> TileMap;
 
 struct Level {
-    tilemap tiles;
+    TileMap tiles;
     TileSet* tile_set;
 };
 
