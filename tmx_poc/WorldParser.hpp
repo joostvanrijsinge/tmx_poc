@@ -21,11 +21,11 @@ public:
 
 private:
     TileSet* _read_tile_set();
-    std::vector<std::vector<Tile*>> _read_map();
+    tilemap _read_map();
     void _read_objects();
 
     TileSet* _tile_set;
-    std::vector<std::vector<Tile*>> _map;
+    tilemap _map;
     rapidxml::xml_node<> * _map_node;
     rapidxml::xml_document<> _doc;
     std::string _file_name;

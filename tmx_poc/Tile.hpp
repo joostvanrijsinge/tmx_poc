@@ -1,16 +1,15 @@
 #ifndef TILE_HPP
 #define TILE_HPP
 
-struct Tile {
-    int x;
-    int y;
-    int texture_id;
-    enum tile_type type;
-};
-
 enum tile_type {
     NORMAL,
     SPAWN
 };
+
+struct Tile {
+    int texture_id;
+    tile_type type;
+};
+
 
 #endif // !TILE_HPP

@@ -77,7 +77,7 @@ TileSet* WorldParser::_read_tile_set()
 /// * tile_type
 ///
 /// \return returns a 2d vector of Tile*
-std::vector<std::vector<Tile*>> WorldParser::_read_map()
+tilemap WorldParser::_read_map()
 {
     std::vector<std::vector<int>> int_map;
 
@@ -103,21 +103,17 @@ std::vector<std::vector<Tile*>> WorldParser::_read_map()
         int_map.push_back(row_ints);
     }
 
-    std::vector<std::vector<Tile*>> map;
+    tilemap map;
 
-    for ( int i = 1; i < int_map.size(); i++ ) {
+    for ( int y = 1; y < int_map.size(); y++ ) {
         std::vector<Tile*> map_row;
-        for ( int j = 0; j < int_map.at(i).size(); j++ ) {
-            std::cout << int_map.at( i ).at( j );
+        for ( int x = 0; x < int_map.at(y).size(); x++ ) {
             Tile* new_tile = new Tile;
-            new_tile->texture_id = int_map.at(i).at(j);
-            new_tile->x = i-1;
-            new_tile->y = j;
+            new_tile->texture_id = int_map.at(y).at(x);
             new_tile->type = NORMAL;
             map_row.push_back(new_tile);
         }
         map.push_back(map_row);
-        std::cout << "\n";
     }
     return map;
 }
