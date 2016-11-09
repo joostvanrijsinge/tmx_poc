@@ -16,44 +16,40 @@ WorldParser::~WorldParser()
 /// This function generates a Level object which has:
 /// * 2D vector of Tiles
 /// * TileSet struct
-/// 
+/// needs to be inside try catch
+///
 /// \param file_name location of the file to be used
 /// \return returns a Level pointer
 Level* WorldParser::generate_level( std::string file_name )
 {
-    try {
-        // parses the .tmx into a xml_document object which rapidxml uses to get the nodes.
-        xml_document<> doc;
-        std::ifstream the_file( file_name );
-        if ( the_file.is_open() ) {
-            vector<char> buffer( ( std::istreambuf_iterator<char>( the_file ) ), std::istreambuf_iterator<char>() );
-            // if we don't append '\0' rapidxml throws parse_exception
-            buffer.push_back( '\0' );
-            doc.parse<0>( &buffer[0] );
+    // parses the .tmx into a xml_document object which rapidxml uses to get the nodes.
+    xml_document<> doc;
+    std::ifstream the_file( file_name );
+    if ( the_file.is_open() ) {
+        vector<char> buffer( ( std::istreambuf_iterator<char>( the_file ) ), std::istreambuf_iterator<char>() );
+        // if we don't append '\0' rapidxml throws parse_exception
+        buffer.push_back( '\0' );
+        doc.parse<0>( &buffer[0] );
 
-            xml_node<> * map_node = doc.first_node( "map" );
-            if ( map_node == 0 ) {
-                throw exception( "file invalid no TileMap" );
-            }
-
-            TileSet * tile_set = this->_read_tile_set( map_node );
-            vector<vector<int>> int_map = this->_read_int_map( map_node );
-            TileMap map = this->_read_map( map_node, int_map );
-            this->_read_objects( map_node, map );
-
-            // generated_level needs to be deleted in the mainclass/gameloop when this level has been completed/finished/player quits.
-            Level* generated_level = new Level;
-            generated_level->tile_set = tile_set;
-            generated_level->tiles = map;
-
-            return generated_level;
+        xml_node<> * map_node = doc.first_node( "map" );
+        if ( map_node == 0 ) {
+            throw exception( "file invalid no TileMap" );
         }
-        else {
-            throw exception( "can't open file" );
-        }
+
+        TileSet * tile_set = this->_read_tile_set( map_node );
+        vector<vector<int>> int_map = this->_read_int_map( map_node );
+        TileMap map = this->_read_map( map_node, int_map );
+        this->_read_objects( map_node, map );
+
+        // generated_level needs to be deleted in the mainclass/gameloop when this level has been completed/finished/player quits.
+        Level* generated_level = new Level;
+        generated_level->tile_set = tile_set;
+        generated_level->tiles = map;
+
+        return generated_level;
     }
-    catch ( const exception& e ) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    else {
+        throw exception( "can't open file" );
     }
 
 }
