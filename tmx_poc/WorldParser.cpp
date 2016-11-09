@@ -18,7 +18,7 @@ WorldParser::~WorldParser()
 /// * TileSet struct
 /// 
 /// \param file_name location of the file to be used
-/// \return returns a Level*
+/// \return returns a Level pointer
 Level* WorldParser::generate_level( std::string file_name )
 {
     try {
@@ -67,7 +67,7 @@ Level* WorldParser::generate_level( std::string file_name )
 /// * texture_source
 ///
 /// \param map_node the node named map from the .tmx
-/// \return returns a TileSet*
+/// \return returns a TileSet pointer
 TileSet* WorldParser::_read_tile_set(xml_node<> * map_node)
 {
     TileSet* tile_set = new TileSet();
@@ -94,7 +94,7 @@ TileSet* WorldParser::_read_tile_set(xml_node<> * map_node)
 /// returns a 2d vector of ints from the file that includes the texture value
 ///
 /// \param map_node the node named map from the .tmx
-/// \return returns a 2d vector of Tile*
+/// \return returns a 2d vector of ints
 vector<vector<int>> WorldParser::_read_int_map( xml_node<>* map_node )
 {
     vector<vector<int>> int_map;
