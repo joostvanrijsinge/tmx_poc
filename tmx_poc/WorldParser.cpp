@@ -19,28 +19,42 @@ WorldParser::~WorldParser()
 /// 
 /// \param file_name location of the file to be used
 /// \return returns a Level*
-
 Level* WorldParser::generate_level( std::string file_name )
 {
-    _file_name = file_name;
+    this->_file_name = file_name;
 
-    std::ifstream the_File( _file_name );
-    std::vector<char> buffer( ( std::istreambuf_iterator<char>( the_File ) ), std::istreambuf_iterator<char>() );
-    buffer.push_back( '\0' );
-    _doc.parse<0>( &buffer[0] );
+    try {
+        // parses the .tmx into a xml_document object which rapidxml uses to get the nodes.
+        std::ifstream the_file( _file_name );
+        if ( the_file.is_open() ) {
+            vector<char> buffer( ( std::istreambuf_iterator<char>( the_file ) ), std::istreambuf_iterator<char>() );
+            buffer.push_back( '\0' );
+            this->_doc.parse<0>( &buffer[0] );
 
-    _map_node = _doc.first_node( "map" );
+            this->_map_node = this->_doc.first_node( "map" );
+            if ( _map_node == 0 ) {
+                throw exception( "file invalid no TileMap" );
+            }
 
+            this->_tile_set = _read_tile_set();
+            this->_map = _read_map();
+            this->_read_objects();
 
-    _tile_set = _read_tile_set();
-    _map = _read_map();
-    _read_objects();
+            // generated_level needs to be deleted in the mainclass/gameloop when this level has been completed/finished/player quits.
+            Level* generated_level = new Level;
+            generated_level->tile_set = this->_tile_set;
+            generated_level->tiles = this->_map;
 
-    Level* generated_level = new Level;
-    generated_level->tile_set = _tile_set;
-    generated_level->tiles = _map;
-
-    return generated_level;
+            return generated_level;
+        }
+        else {
+            throw exception("can't open file");
+        }
+    }
+    catch ( const exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+    }
+    
 }
 
 /// \brief returns a TileSet
@@ -54,18 +68,23 @@ Level* WorldParser::generate_level( std::string file_name )
 /// \return returns a TileSet*
 TileSet* WorldParser::_read_tile_set()
 {
-    TileSet* re_tile_set = new TileSet();
+    TileSet* tile_set = new TileSet();
 
-    rapidxml::xml_node<> * tileset_node = _map_node->first_node( "tileset" );
-    rapidxml::xml_node<> * image_node = tileset_node->first_node( "image" );
+    xml_node<> * tileset_node = _map_node->first_node("tileset");
+    if ( tileset_node == 0 ) {
+        throw exception("file invalid no textures");
+    }
+    xml_node<> * image_node = tileset_node->first_node("image");
+    if ( image_node == 0 ) {
+        throw exception( "file invalid no textures" );
+    }
 
-    re_tile_set->texture_name = tileset_node->first_attribute("name")->value();
-    re_tile_set->tile_width = std::atoi( tileset_node->first_attribute( "tilewidth" )->value() );
-    re_tile_set->tile_height = std::atoi( tileset_node->first_attribute( "tileheight" )->value() );
-    re_tile_set->texture_source = image_node->first_attribute("source")->value();
+    tile_set->texture_name = tileset_node->first_attribute( "name" )->value();
+    tile_set->tile_width = std::stoi( tileset_node->first_attribute( "tilewidth" )->value() );
+    tile_set->tile_height = std::stoi( tileset_node->first_attribute( "tileheight" )->value() );
+    tile_set->texture_source = image_node->first_attribute( "source" )->value();
 
-
-    return re_tile_set;
+    return tile_set;
 }
 
 /// \brief returns a 2d vector of Tile
@@ -79,37 +98,40 @@ TileSet* WorldParser::_read_tile_set()
 /// \return returns a 2d vector of Tile*
 TileMap WorldParser::_read_map()
 {
-    std::vector<std::vector<int>> int_map;
+    vector<vector<int>> int_map;
 
-    rapidxml::xml_node<> * layer_node = _map_node->first_node( "layer" );
-    rapidxml::xml_node<> * data_node = layer_node->first_node( "data" );
-
-    char* data_value = data_node->value();
-    
-
-    std::stringstream ss(data_value);
-    std::string row_chars;
-
-    
-    while ( std::getline(ss,row_chars,'\n') ) {
-
-        std::vector<int> row_ints;
-        std::stringstream inner_ss(row_chars);
-        std::string x_y_char;
-
-        while (std::getline(inner_ss, x_y_char, ',')) {
-            row_ints.push_back(std::atoi(x_y_char.c_str()));
-        }
-        int_map.push_back(row_ints);
+    xml_node<> * layer_node = _map_node->first_node("layer");
+    if ( layer_node == 0 ) {
+        throw exception( "file invalid no TileMap" );
+    }
+    xml_node<> * data_node = layer_node->first_node("data");
+    if ( data_node == 0 ) {
+        throw exception( "file invalid no TileMap" );
     }
 
+    char* data_value = data_node->value();
+    std::stringstream row_ss(data_value);
+    string row_chars;
+
+    while ( std::getline( row_ss, row_chars, '\n' ) ) {
+
+        vector<int> row_ints;
+        std::stringstream char_ss( row_chars );
+        string x_y_char;
+
+        while ( std::getline( char_ss, x_y_char, ',' ) ) {
+            row_ints.push_back( std::stoi( x_y_char.c_str() ) );
+        }
+        int_map.push_back( row_ints );
+    }
+    
     TileMap map;
 
     for ( int y = 1; y < int_map.size(); y++ ) {
-        std::vector<Tile*> map_row;
-        for ( int x = 0; x < int_map.at(y).size(); x++ ) {
+        vector<Tile*> map_row;
+        for ( int x = 0; x < int_map[y].size(); x++ ) {
             Tile* new_tile = new Tile;
-            new_tile->texture_id = int_map.at(y).at(x);
+            new_tile->texture_id = int_map[y][x];
             new_tile->type = NORMAL;
             map_row.push_back(new_tile);
         }
@@ -124,13 +146,20 @@ TileMap WorldParser::_read_map()
 /// for now only works with spawn objects.
 void WorldParser::_read_objects()
 {
-    rapidxml::xml_node<> * object_group_node = _map_node->first_node( "objectgroup" );
-
-    for ( rapidxml::xml_node<> * object_node = object_group_node->first_node("object"); object_node; object_node = object_node->next_sibling() ) {
-        if ( std::strcmp(object_node->first_attribute( "type" )->value(), "Spawn") == 0 ) {
-            int x = std::atoi( object_node->first_attribute( "x" )->value() ) / 64;
-            int y = std::atoi( object_node->first_attribute( "y" )->value() ) / 64;
-            _map.at( x ).at( y )->type = SPAWN;
+    xml_node<> * object_group_node = _map_node->first_node("objectgroup");
+    if ( object_group_node == 0 ) {
+        throw exception( "file invalid no Objects" );
+    }
+    bool has_player_spawn = false;
+    for ( xml_node<> * object_node = object_group_node->first_node("object"); object_node; object_node = object_node->next_sibling() ) {
+        if ( std::strcmp(object_node->first_attribute("type")->value(), "Spawn") == 0 ) {
+            int x = std::stoi( object_node->first_attribute( "x" )->value() ) / 64;
+            int y = std::stoi( object_node->first_attribute( "y" )->value() ) / 64;
+            this->_map[x][y]->type = SPAWN;
+            has_player_spawn = true;
         }
+    }
+    if ( !has_player_spawn ) {
+        throw exception( "file invalid no SpawnPoint" );
     }
 }

@@ -6,10 +6,18 @@
 #include <fstream>
 #include <vector>
 #include <sstream>
+#include <cstring>
 #include "TileSet.hpp"
 #include "Level.hpp"
 #include "Tile.hpp"
 #include "rapidxml-1.13/rapidxml.hpp"
+#include "rapidxml-1.13/rapidxml_utils.hpp"
+
+using std::vector;
+using std::string;
+using rapidxml::xml_node;
+using rapidxml::xml_document;
+using std::exception;
 
 class WorldParser
 {
@@ -26,9 +34,9 @@ private:
 
     TileSet* _tile_set;
     TileMap _map;
-    rapidxml::xml_node<> * _map_node;
-    rapidxml::xml_document<> _doc;
-    std::string _file_name;
+    xml_node<> * _map_node;
+    xml_document<> _doc;
+    string _file_name;
     
 };
 

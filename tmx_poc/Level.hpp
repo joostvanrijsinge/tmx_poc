@@ -4,7 +4,9 @@
 #include "TileSet.hpp"
 #include <vector>
 
-typedef std::vector<std::vector<Tile*>> TileMap;
+using std::vector;
+
+typedef vector<vector<Tile*>> TileMap;
 
 struct Level {
     TileMap tiles;
