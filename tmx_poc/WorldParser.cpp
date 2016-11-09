@@ -36,10 +36,10 @@ Level* WorldParser::generate_level( std::string file_name )
                 throw exception( "file invalid no TileMap" );
             }
 
-            TileSet * tile_set = this->_read_tile_set(map_node);
-            vector<vector<int>> int_map = this->_read_int_map(map_node);
-            TileMap map = this->_read_map(map_node, int_map);
-            this->_read_objects(map_node, map);
+            TileSet * tile_set = this->_read_tile_set( map_node );
+            vector<vector<int>> int_map = this->_read_int_map( map_node );
+            TileMap map = this->_read_map( map_node, int_map );
+            this->_read_objects( map_node, map );
 
             // generated_level needs to be deleted in the mainclass/gameloop when this level has been completed/finished/player quits.
             Level* generated_level = new Level;
@@ -49,13 +49,13 @@ Level* WorldParser::generate_level( std::string file_name )
             return generated_level;
         }
         else {
-            throw exception("can't open file");
+            throw exception( "can't open file" );
         }
     }
-    catch ( const exception& e) {
+    catch ( const exception& e ) {
         std::cerr << "Error: " << e.what() << std::endl;
     }
-    
+
 }
 
 /// \brief returns a TileSet
@@ -68,15 +68,15 @@ Level* WorldParser::generate_level( std::string file_name )
 ///
 /// \param map_node the node named map from the .tmx
 /// \return returns a TileSet pointer
-TileSet* WorldParser::_read_tile_set(xml_node<> * map_node)
+TileSet* WorldParser::_read_tile_set( xml_node<> * map_node )
 {
     TileSet* tile_set = new TileSet();
 
-    xml_node<> * tileset_node = map_node->first_node("tileset");
+    xml_node<> * tileset_node = map_node->first_node( "tileset" );
     if ( tileset_node == 0 ) {
-        throw exception("file invalid no textures");
+        throw exception( "file invalid no textures" );
     }
-    xml_node<> * image_node = tileset_node->first_node("image");
+    xml_node<> * image_node = tileset_node->first_node( "image" );
     if ( image_node == 0 ) {
         throw exception( "file invalid no textures" );
     }
@@ -147,9 +147,9 @@ TileMap WorldParser::_read_map( xml_node<> * map_node, vector<vector<int>> int_m
             Tile* new_tile = new Tile;
             new_tile->texture_id = int_map[y][x];
             new_tile->type = NORMAL;
-            map_row.push_back(new_tile);
+            map_row.push_back( new_tile );
         }
-        map.push_back(map_row);
+        map.push_back( map_row );
     }
     return map;
 }
@@ -163,13 +163,13 @@ TileMap WorldParser::_read_map( xml_node<> * map_node, vector<vector<int>> int_m
 /// \param map the current TileMap of this level to be edited with objects
 void WorldParser::_read_objects( xml_node<> * map_node, TileMap map )
 {
-    xml_node<> * object_group_node = map_node->first_node("objectgroup");
+    xml_node<> * object_group_node = map_node->first_node( "objectgroup" );
     if ( object_group_node == 0 ) {
         throw exception( "file invalid no Objects" );
     }
     bool has_player_spawn = false;
-    for ( xml_node<> * object_node = object_group_node->first_node("object"); object_node; object_node = object_node->next_sibling() ) {
-        if ( std::strcmp(object_node->first_attribute("type")->value(), "Spawn") == 0 ) {
+    for ( xml_node<> * object_node = object_group_node->first_node( "object" ); object_node; object_node = object_node->next_sibling() ) {
+        if ( std::strcmp( object_node->first_attribute( "type" )->value(), "Spawn" ) == 0 ) {
             int x = std::stoi( object_node->first_attribute( "x" )->value() ) / 64;
             int y = std::stoi( object_node->first_attribute( "y" )->value() ) / 64;
             map[x][y]->type = SPAWN;
