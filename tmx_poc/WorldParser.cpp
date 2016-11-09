@@ -21,29 +21,30 @@ WorldParser::~WorldParser()
 /// \return returns a Level*
 Level* WorldParser::generate_level( std::string file_name )
 {
-    this->_file_name = file_name;
-
     try {
         // parses the .tmx into a xml_document object which rapidxml uses to get the nodes.
-        std::ifstream the_file( _file_name );
+        xml_document<> doc;
+        std::ifstream the_file( file_name );
         if ( the_file.is_open() ) {
             vector<char> buffer( ( std::istreambuf_iterator<char>( the_file ) ), std::istreambuf_iterator<char>() );
+            // if we don't append '\0' rapidxml throws parse_exception
             buffer.push_back( '\0' );
-            this->_doc.parse<0>( &buffer[0] );
+            doc.parse<0>( &buffer[0] );
 
-            this->_map_node = this->_doc.first_node( "map" );
-            if ( _map_node == 0 ) {
+            xml_node<> * map_node = doc.first_node( "map" );
+            if ( map_node == 0 ) {
                 throw exception( "file invalid no TileMap" );
             }
 
-            this->_tile_set = _read_tile_set();
-            this->_map = _read_map();
-            this->_read_objects();
+            TileSet * tile_set = this->_read_tile_set(map_node);
+            vector<vector<int>> int_map = this->_read_int_map(map_node);
+            TileMap map = this->_read_map(map_node, int_map);
+            this->_read_objects(map_node, map);
 
             // generated_level needs to be deleted in the mainclass/gameloop when this level has been completed/finished/player quits.
             Level* generated_level = new Level;
-            generated_level->tile_set = this->_tile_set;
-            generated_level->tiles = this->_map;
+            generated_level->tile_set = tile_set;
+            generated_level->tiles = map;
 
             return generated_level;
         }
@@ -65,12 +66,13 @@ Level* WorldParser::generate_level( std::string file_name )
 /// * tile_height
 /// * texture_source
 ///
+/// \param map_node the node named map from the .tmx
 /// \return returns a TileSet*
-TileSet* WorldParser::_read_tile_set()
+TileSet* WorldParser::_read_tile_set(xml_node<> * map_node)
 {
     TileSet* tile_set = new TileSet();
 
-    xml_node<> * tileset_node = _map_node->first_node("tileset");
+    xml_node<> * tileset_node = map_node->first_node("tileset");
     if ( tileset_node == 0 ) {
         throw exception("file invalid no textures");
     }
@@ -87,34 +89,30 @@ TileSet* WorldParser::_read_tile_set()
     return tile_set;
 }
 
-/// \brief returns a 2d vector of Tile
+/// \brief returns a 2d vector of ints
 ///
-/// returns a 2d vector of Tile from the file that includes per Tile:
-/// * texture_id
-/// * x position
-/// * y position
-/// * tile_type
+/// returns a 2d vector of ints from the file that includes the texture value
 ///
+/// \param map_node the node named map from the .tmx
 /// \return returns a 2d vector of Tile*
-TileMap WorldParser::_read_map()
+vector<vector<int>> WorldParser::_read_int_map( xml_node<>* map_node )
 {
     vector<vector<int>> int_map;
 
-    xml_node<> * layer_node = _map_node->first_node("layer");
+    xml_node<> * layer_node = map_node->first_node( "layer" );
     if ( layer_node == 0 ) {
         throw exception( "file invalid no TileMap" );
     }
-    xml_node<> * data_node = layer_node->first_node("data");
+    xml_node<> * data_node = layer_node->first_node( "data" );
     if ( data_node == 0 ) {
         throw exception( "file invalid no TileMap" );
     }
 
     char* data_value = data_node->value();
-    std::stringstream row_ss(data_value);
+    std::stringstream row_ss( data_value );
     string row_chars;
 
     while ( std::getline( row_ss, row_chars, '\n' ) ) {
-
         vector<int> row_ints;
         std::stringstream char_ss( row_chars );
         string x_y_char;
@@ -124,7 +122,23 @@ TileMap WorldParser::_read_map()
         }
         int_map.push_back( row_ints );
     }
-    
+
+    return int_map;
+}
+
+/// \brief returns a 2d vector of Tile
+///
+/// returns a 2d vector of Tile from the file that includes per Tile:
+/// * texture_id
+/// * x position
+/// * y position
+/// * tile_type
+///
+/// \param map_node the node named map from the .tmx
+/// \param int_map 2d vector of ints with texture values
+/// \return returns a TileMap
+TileMap WorldParser::_read_map( xml_node<> * map_node, vector<vector<int>> int_map )
+{
     TileMap map;
 
     for ( int y = 1; y < int_map.size(); y++ ) {
@@ -144,9 +158,12 @@ TileMap WorldParser::_read_map()
 ///
 /// checks the file for object and if object is found changes the tile_type of the tiles within the objects range.
 /// for now only works with spawn objects.
-void WorldParser::_read_objects()
+///
+/// \param map_node the node named map from the .tmx
+/// \param map the current TileMap of this level to be edited with objects
+void WorldParser::_read_objects( xml_node<> * map_node, TileMap map )
 {
-    xml_node<> * object_group_node = _map_node->first_node("objectgroup");
+    xml_node<> * object_group_node = map_node->first_node("objectgroup");
     if ( object_group_node == 0 ) {
         throw exception( "file invalid no Objects" );
     }
@@ -155,7 +172,7 @@ void WorldParser::_read_objects()
         if ( std::strcmp(object_node->first_attribute("type")->value(), "Spawn") == 0 ) {
             int x = std::stoi( object_node->first_attribute( "x" )->value() ) / 64;
             int y = std::stoi( object_node->first_attribute( "y" )->value() ) / 64;
-            this->_map[x][y]->type = SPAWN;
+            map[x][y]->type = SPAWN;
             has_player_spawn = true;
         }
     }
