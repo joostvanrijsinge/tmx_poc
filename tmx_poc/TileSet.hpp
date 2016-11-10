@@ -9,7 +9,6 @@ struct TileSet {
     string texture_source;
     size_t tile_width;
     size_t tile_height;
-
 };
 
 
