@@ -1,6 +1,6 @@
 ### Dependencies
 In order to clone the repository with the RapidXML submodule, either clone the
-repo with the `--recursive` flag, or perform the following steps after a refular
+repo with the `--recursive` flag, or perform the following steps after a regular
 clone.
 
 ```
