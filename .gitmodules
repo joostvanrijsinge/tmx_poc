@@ -1,0 +1,3 @@
+[submodule "tmx_poc/libs/RapidXML"]
+	path = tmx_poc/libs/RapidXML
+	url = git@github.com:jorgdebont/RapidXML.git
