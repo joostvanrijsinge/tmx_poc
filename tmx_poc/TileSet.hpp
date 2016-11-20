@@ -5,10 +5,10 @@
 using std::string;
 
 struct TileSet {
-    string texture_name;
     string texture_source;
-    size_t tile_width;
-    size_t tile_height;
+    size_t image_width;
+    size_t image_height;
+    size_t tile_size;
 };
 
 
