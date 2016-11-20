@@ -142,13 +142,11 @@ vector<tuple<size_t, size_t, char*>> RapidXMLAdapter::get_objects()
 {
     vector<tuple<size_t, size_t, char*>> object_list;
     for ( xml_node<> * object_node = _object_group_node->first_node( "object" ); object_node; object_node = object_node->next_sibling() ) {
-        //if ( std::strcmp( object_node->first_attribute( "type" )->value(), "Spawn" ) == 0 ) {
             size_t x = std::stoi( object_node->first_attribute( "x" )->value() ) / 64;
             size_t y = std::stoi( object_node->first_attribute( "y" )->value() ) / 64;
             char* type = object_node->first_attribute( "type" )->value();
             tuple<size_t, size_t, char*> object (x, y, type);
             object_list.push_back(object);
-        //}
     }
     return object_list;
 }

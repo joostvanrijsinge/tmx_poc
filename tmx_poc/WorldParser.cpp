@@ -54,7 +54,7 @@ Level* WorldParser::generate_level( std::string file_location )
     object_list = rapid_adapter->get_objects();
 
     for ( size_t i = 0; i < object_list.size(); i++ ) {
-        if ( std::strcmp(get<2>( object_list[i] ), "Spawn" ) == 0 ) {
+        if ( std::strcmp(get<2>( object_list[i] ), "PlayerSpawn" ) == 0 ) {
             map[get<0>( object_list[i] )][get<1>( object_list[i] )]->type = SPAWN;
         }
         // Other Objects
