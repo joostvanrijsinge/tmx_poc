@@ -20,9 +20,9 @@ WorldParser::~WorldParser()
 /// * TileSet struct
 /// needs to be inside try catch
 ///
-/// \param file_name location of the file to be used
+/// \param file_location location of the file to be used
 /// \return returns a Level pointer
-Level* WorldParser::generate_level( std::string file_name )
+Level* WorldParser::generate_level( std::string file_location )
 {
     RapidXMLAdapter* rapid_adapter = new RapidXMLAdapter();
     TileSet* tile_set = new TileSet();
@@ -30,7 +30,7 @@ Level* WorldParser::generate_level( std::string file_name )
     TileMap map;
     vector<tuple<size_t, size_t, char*>> object_list;
 
-    rapid_adapter->setup_document(file_name);
+    rapid_adapter->setup_document( file_location );
 
 
     tile_set->texture_source = rapid_adapter->get_texture_source();

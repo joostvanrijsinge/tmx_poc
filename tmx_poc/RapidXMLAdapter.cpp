@@ -7,13 +7,17 @@ RapidXMLAdapter::RapidXMLAdapter()
     _doc = new xml_document<>;
 }
 
-
 RapidXMLAdapter::~RapidXMLAdapter()
 {
     delete _doc;
     delete _map_node;
 }
 
+/// \brief Set-up of RapidXML xml_document and xml_nodes
+/// 
+/// This function prepares one xml_documents and several nodes that need to exist in the .tmx file
+///
+/// \param file_location location of the file to be used
 void RapidXMLAdapter::setup_document( string file_location )
 {
     //clear xml document before setup
@@ -61,21 +65,37 @@ void RapidXMLAdapter::setup_document( string file_location )
     }
 }
 
+/// \brief gets the texture source from loaded .tmx
+/// 
+/// This function returns the source location of the texture that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 string RapidXMLAdapter::get_texture_source()
 {
     return _image_node->first_attribute( "source" )->value();
 }
 
+/// \brief gets the texture image height from loaded .tmx
+/// 
+/// This function returns the texture image height of the texture that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 size_t RapidXMLAdapter::get_image_height()
 {
     return std::stoi( _image_node->first_attribute( "height" )->value() );
 }
 
+/// \brief gets the texture image width from loaded .tmx
+/// 
+/// This function returns the texture image width of the texture that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 size_t RapidXMLAdapter::get_image_width()
 {
     return std::stoi( _image_node->first_attribute( "width" )->value() );
 }
 
+/// \brief gets the texture tile size from loaded .tmx
+/// 
+/// This function returns the texture tile size of the texture that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 size_t RapidXMLAdapter::get_tile_size()
 {
     size_t tile_height, tile_width;
@@ -89,6 +109,10 @@ size_t RapidXMLAdapter::get_tile_size()
     }
 }
 
+/// \brief gets the texture valued map from loaded .tmx
+/// 
+/// This function returns the texture valued map that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 vector<vector<size_t>> RapidXMLAdapter::get_map()
 {
     vector<vector<size_t>> map;
@@ -110,6 +134,10 @@ vector<vector<size_t>> RapidXMLAdapter::get_map()
     return map;
 }
 
+/// \brief gets the objects from loaded .tmx
+/// 
+/// This function returns the objects that is used in this .tmx.
+/// RapidXMLAdapter::setup_document has to be called before using this 
 vector<tuple<size_t, size_t, char*>> RapidXMLAdapter::get_objects()
 {
     vector<tuple<size_t, size_t, char*>> object_list;
