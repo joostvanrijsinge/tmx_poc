@@ -33,7 +33,7 @@
 </data>
  </layer>
  <objectgroup name="Object Layer 1">
-  <object id="4" name="StartPoint" type="Spawn" x="64" y="64" width="64" height="64">
+  <object id="4" name="StartPoint" type="PlayerSpawn" x="768" y="704" width="64" height="64">
    <properties>
     <property name="PlayerSpawn" type="bool" value="true"/>
    </properties>
